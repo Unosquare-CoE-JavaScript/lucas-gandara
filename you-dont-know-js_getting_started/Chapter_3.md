@@ -1,4 +1,4 @@
-# You dont know js yet
+# You don't know js yet
 
 ## Chapter 3: Digging to the root of Js.
 
@@ -21,7 +21,7 @@ The spread _..._ operator has two variations, spread and rest. Consider the foll
 
 ```js
 // Spread operator used to "spread" a variable into an array
-const it = [1, 2, 3, {nombre: 'Lucas', appellido: 'Gandara'}];
+const it = [1, 2, 3, {name: 'Lucas', lastName: 'Gandara'}];
 const [one, two, ...rest] = [...it]
 console.log(rest[1] == it[3])
 
@@ -44,7 +44,7 @@ console.log(result);
 
 ```
 
-ES6 defined the basic data structure/collection types in JS asiterables. This includes strings, arrays, maps, sets, and others.
+ES6 defined the basic data structure/collection types in JS as iterables. This includes strings, arrays, maps, sets, and others.
 
 ### The concept of shallow copy. (Taken from: [MDN](https://developer.mozilla.org/en-US/docs/Glossary/Shallow_copy))
 A shallow copy of an object is a copy whose properties share the same references (point to the same underlying values) as those of the source object from which the copy was made. As a result, when you change either the source or the copy, you may also cause the other object to change too. That behavior contrasts with the behavior of a deep copy, in which the source and copy are completely independent.
@@ -59,17 +59,17 @@ More formally, two objects o1 and o2 are shallow copies if:
 Consider:
 
 ```js
-const x = [0, 1, 2, 3, {nombre: 'lucas'}]
+const x = [0, 1, 2, 3, {name: 'lucas'}]
 
 const y = [...x];
 
-y[4].nombre = 'mateo';
+y[4].name = 'mateo';
 y[0] = 100;
 console.log(y);
-// [ 100, 1, 2, 3, { nombre: 'mateo' } ]
+// [ 100, 1, 2, 3, { name: 'mateo' } ]
 
 console.log(x)
-// [ 0, 1, 2, 3, { nombre: 'mateo' } ];
+// [ 0, 1, 2, 3, { name: 'mateo' } ];
 
 console.log(x == y);
 // false
@@ -85,7 +85,7 @@ All iterators in Js has this 3 properties:
 - entries()
 
 ### Create your own iterator:
-To create an iterator the object needs to have a propertie _Symbol.iterator_, which is a function that returns a _next_ function:
+To create an iterator the object needs to have a property _Symbol.iterator_, which is a function that returns a _next_ function:
 
 ```js
 // Could be any object
@@ -143,7 +143,7 @@ As mentioned before, a closure is the only way to create a reference to a primit
 ### this Keyword.
 When a function is defined, it is attached to its enclosing scope via closure and the Scope is the set of rules that controls how references to variables are resolved. The characteristic that defines the scope and what can a function access is called _execution context_ and it’s exposed to the function via its this keyword.
 
-### Protoypes.
+### Prototypes.
 Prototype is a characteristic of an object and specifically resolution of a property access. A series of objects linked together via prototypes is called the "prototype chain".
 Consider:
 ```js
@@ -151,6 +151,6 @@ let homework {
 	topic: 'Js'
 }
 ```
-The homework object only has a single property on it: topic.However, its default prototype linkage connects to the Ob-ject.prototype object, which has common built-in meth-ods on it like toString() and valueOf(), among others.
+The homework object only has a single property on it: topic.However, its default prototype linkage connects to the Object.prototype object, which has common built-in meth-ods on it like toString() and valueOf(), among others.
 
-The true importanceshines of _this_ when considering how it powers prototype-delegatedfunction calls. Indeed, one of the main reasons _this_ supportsdynamic context based on how the function is called is so thatmethod calls on objects which delegate through the prototypechain still maintain the expected _this_.
+The true importance of _this_ when considering how it powers prototype-delegated function calls. Indeed, one of the main reasons _this_ supports dynamic context based on how the function is called is so that method calls on objects which delegate through the prototype chain still maintain the expected _this_.

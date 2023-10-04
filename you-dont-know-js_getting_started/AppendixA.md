@@ -28,7 +28,7 @@ const gen = generator(10);
 console.log(gen.next().value);
 // Expected output: 10
 
-// IIFE functions (Inmediately Invoked Function Expressions)
+// IIFE functions (Immediately Invoked Function Expressions)
 (function(){ .. })();
 (function namedIIFE(){ .. })();
 
