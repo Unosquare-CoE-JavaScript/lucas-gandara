@@ -22,7 +22,7 @@ Is Js a [parsed language](https://www.techopedia.com/definition/3853/parse) comp
 
 This is the entire flow of a Js program:
 
-![Flow of a Js program](imgs/flow_of_a_js_program.png)
+![Flow of a Js program](../imgs/flow_of_a_js_program.png)
 
 1. Once you transpile your code, and give it to a Js engine: The Js engine parses the code to an AST([Abstract Synstax Tree](https://en.wikipedia.org/wiki/Abstract_syntax_tree)).
 2. The Js engine converts that AST into a byte code, a binary intermediate representation (IR), which is then refined/converted even further by the optimizing JIT(Just In Time) compiler.

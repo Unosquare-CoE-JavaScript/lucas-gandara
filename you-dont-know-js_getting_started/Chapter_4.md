@@ -1,4 +1,4 @@
-# You dont know js yet
+# You don't know js yet
 
 ## Chapter 4: The Bigger Picture.
 

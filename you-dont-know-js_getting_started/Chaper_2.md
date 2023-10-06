@@ -1,4 +1,4 @@
-# You dont know js yet
+# You don't know js yet
 
 ## Chapter 2: Surveying Js.
 **The best way to learn Js is by writing Js**
