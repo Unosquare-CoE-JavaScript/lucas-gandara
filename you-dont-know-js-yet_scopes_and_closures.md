@@ -5,3 +5,4 @@
 - [Chapter 3: The Scope Chain](./you-dont-know-js-yet_scopes-and_closures/Chapter_3.md)
 - [Chapter 4: Around the Global Scope](./you-dont-know-js-yet_scopes-and_closures/Chapter_4.md)
 - [Chapter 5: The (Not So) Secret Lifecycle of Variables](./you-dont-know-js-yet_scopes-and_closures/Chapter_5.md)
+- [Chapter 6: Limiting Scope Exposure](./you-dont-know-js-yet_scopes-and_closures/Chapter_6.md)
