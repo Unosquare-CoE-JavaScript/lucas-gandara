@@ -3,3 +3,4 @@
 1. [Currying](./hardcore_functional_programming_js/Currying.md)
 2. [Composition](./hardcore_functional_programming_js/Composition.md)
 3. [Functors](./hardcore_functional_programming_js/Functors.md)
+4. [Monads](./hardcore_functional_programming_js/Either_monads.md)
