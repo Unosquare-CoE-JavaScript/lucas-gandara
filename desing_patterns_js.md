@@ -578,3 +578,290 @@ const subsystem2 = new Subsystem2();
 const facade = new Facade(subsystem1, subsystem2);
 clientCode(facade);
 ```
+
+### Flyweight
+Flyweight is a structural design pattern that lets you fit more objects into the available amount of RAM by sharing common parts of state between multiple objects instead of keeping all of the data in each object. The Flyweight pattern suggests that you stop storing the extrinsic state inside the object. Instead, you should pass this state to specific methods which rely on it. Only the intrinsic state stays within the object, letting you reuse it in different contexts. As a result, you’d need fewer of these objects since they only differ in the intrinsic state, which has much fewer variations than the extrinsic. Where does the extrinsic state move to? Some class should still store it, right? In most cases, it gets moved to the container object, which aggregates objects before we apply the pattern.
+
+Since the same flyweight object can be used in different contexts, you have to make sure that its state can’t be modified. A flyweight should initialize its state just once, via constructor parameters. It shouldn’t expose any setters or public fields to other objects.
+
+```ts
+/**
+ * The Flyweight stores a common portion of the state (also called intrinsic
+ * state) that belongs to multiple real business entities. The Flyweight accepts
+ * the rest of the state (extrinsic state, unique for each entity) via its
+ * method parameters.
+ */
+class Flyweight {
+    private sharedState: any;
+
+    constructor(sharedState: any) {
+        this.sharedState = sharedState;
+    }
+
+    public operation(uniqueState): void {
+        const s = JSON.stringify(this.sharedState);
+        const u = JSON.stringify(uniqueState);
+        console.log(`Flyweight: Displaying shared (${s}) and unique (${u}) state.`);
+    }
+}
+
+/**
+ * The Flyweight Factory creates and manages the Flyweight objects. It ensures
+ * that flyweights are shared correctly. When the client requests a flyweight,
+ * the factory either returns an existing instance or creates a new one, if it
+ * doesn't exist yet.
+ */
+class FlyweightFactory {
+    private flyweights: {[key: string]: Flyweight} = <any>{};
+
+    constructor(initialFlyweights: string[][]) {
+        for (const state of initialFlyweights) {
+            this.flyweights[this.getKey(state)] = new Flyweight(state);
+        }
+    }
+
+    /**
+     * Returns a Flyweight's string hash for a given state.
+     */
+    private getKey(state: string[]): string {
+        return state.join('_');
+    }
+
+    /**
+     * Returns an existing Flyweight with a given state or creates a new one.
+     */
+    public getFlyweight(sharedState: string[]): Flyweight {
+        const key = this.getKey(sharedState);
+
+        if (!(key in this.flyweights)) {
+            console.log('FlyweightFactory: Can\'t find a flyweight, creating new one.');
+            this.flyweights[key] = new Flyweight(sharedState);
+        } else {
+            console.log('FlyweightFactory: Reusing existing flyweight.');
+        }
+
+        return this.flyweights[key];
+    }
+
+    public listFlyweights(): void {
+        const count = Object.keys(this.flyweights).length;
+        console.log(`\nFlyweightFactory: I have ${count} flyweights:`);
+        for (const key in this.flyweights) {
+            console.log(key);
+        }
+    }
+}
+
+/**
+ * The client code usually creates a bunch of pre-populated flyweights in the
+ * initialization stage of the application.
+ */
+const factory = new FlyweightFactory([
+    ['Chevrolet', 'Camaro2018', 'pink'],
+    ['Mercedes Benz', 'C300', 'black'],
+    ['Mercedes Benz', 'C500', 'red'],
+    ['BMW', 'M5', 'red'],
+    ['BMW', 'X6', 'white'],
+    // ...
+]);
+factory.listFlyweights();
+
+// ...
+
+function addCarToPoliceDatabase(
+    ff: FlyweightFactory, plates: string, owner: string,
+    brand: string, model: string, color: string,
+) {
+    console.log('\nClient: Adding a car to database.');
+    const flyweight = ff.getFlyweight([brand, model, color]);
+
+    // The client code either stores or calculates extrinsic state and passes it
+    // to the flyweight's methods.
+    flyweight.operation([plates, owner]);
+}
+
+addCarToPoliceDatabase(factory, 'CL234IR', 'James Doe', 'BMW', 'M5', 'red');
+
+addCarToPoliceDatabase(factory, 'CL234IR', 'James Doe', 'BMW', 'X1', 'red');
+
+factory.listFlyweights();
+```
+
+### Proxy
+Proxy is a structural design pattern that lets you provide a substitute or placeholder for another object. A proxy controls access to the original object, allowing you to perform something either before or after the request gets through to the original object. Why would you want to control access to an object? Here is an example: you have a massive object that consumes a vast amount of system resources. You need it from time to time, but not always. The Proxy pattern suggests that you create a new proxy class with the same interface as an original service object. Then you update your app so that it passes the proxy object to all of the original object’s clients. Upon receiving a request from a client, the proxy creates a real service object and delegates all the work to it.
+
+**But what’s the benefit?** If you need to execute something either before or after the primary logic of the class, the proxy lets you do this without changing that class. Since the proxy implements the same interface as the original class, it can be passed to any client that expects a real service object.
+```ts
+/**
+ * The Subject interface declares common operations for both RealSubject and the
+ * Proxy. As long as the client works with RealSubject using this interface,
+ * you'll be able to pass it a proxy instead of a real subject.
+ */
+interface Subject {
+    request(): void;
+}
+
+/**
+ * The RealSubject contains some core business logic. Usually, RealSubjects are
+ * capable of doing some useful work which may also be very slow or sensitive -
+ * e.g. correcting input data. A Proxy can solve these issues without any
+ * changes to the RealSubject's code.
+ */
+class RealSubject implements Subject {
+    public request(): void {
+        console.log('RealSubject: Handling request.');
+    }
+}
+
+/**
+ * The Proxy has an interface identical to the RealSubject.
+ */
+class Proxy implements Subject {
+    private realSubject: RealSubject;
+
+    /**
+     * The Proxy maintains a reference to an object of the RealSubject class. It
+     * can be either lazy-loaded or passed to the Proxy by the client.
+     */
+    constructor(realSubject: RealSubject) {
+        this.realSubject = realSubject;
+    }
+
+    /**
+     * The most common applications of the Proxy pattern are lazy loading,
+     * caching, controlling the access, logging, etc. A Proxy can perform one of
+     * these things and then, depending on the result, pass the execution to the
+     * same method in a linked RealSubject object.
+     */
+    public request(): void {
+        if (this.checkAccess()) {
+            this.realSubject.request();
+            this.logAccess();
+        }
+    }
+
+    private checkAccess(): boolean {
+        // Some real checks should go here.
+        console.log('Proxy: Checking access prior to firing a real request.');
+
+        return true;
+    }
+
+    private logAccess(): void {
+        console.log('Proxy: Logging the time of request.');
+    }
+}
+
+/**
+ * The client code is supposed to work with all objects (both subjects and
+ * proxies) via the Subject interface in order to support both real subjects and
+ * proxies. In real life, however, clients mostly work with their real subjects
+ * directly. In this case, to implement the pattern more easily, you can extend
+ * your proxy from the real subject's class.
+ */
+function clientCode(subject: Subject) {
+    // ...
+
+    subject.request();
+
+    // ...
+}
+
+console.log('Client: Executing the client code with a real subject:');
+const realSubject = new RealSubject();
+clientCode(realSubject);
+
+console.log('');
+
+console.log('Client: Executing the same client code with a proxy:');
+const proxy = new Proxy(realSubject);
+clientCode(proxy);
+```
+
+## Behavioral patterns
+These patterns are concerned with algorithms and the assignment of responsibilities between objects.
+
+### Chain of responsability
+Chain of Responsibility is a behavioral design pattern that lets you pass requests along a chain of handlers. Upon receiving a request, each handler decides either to process the request or to pass it to the next handler in the chain. Like many other behavioral design patterns, the **Chain of Responsibility** relies on transforming particular behaviors into stand-alone objects called _handlers_. In our case, each check should be extracted to its own class with a single method that performs the check. The request, along with its data, is passed to this method as an argument. The pattern suggests that you link these handlers into a chain. Each linked handler has a field for storing a reference to the next handler in the chain. In addition to processing a request, handlers pass the request further along the chain. The request travels along the chain until all handlers have had a chance to process it.
+
+For instance, when a user clicks a button, the event propagates through the chain of GUI elements that starts with the button, goes along its containers (like forms or panels), and ends up with the main application window. The event is processed by the first element in the chain that’s capable of handling it. This example is also noteworthy because it shows that a chain can always be extracted from an object tree.
+
+![A chain can be formed from a branch of an object tree.](./imgs/chain_of_responsability_design_pattern.png)
+for instance:
+```ts
+/**
+ * The Handler interface declares a method for building the chain of handlers.
+ * It also declares a method for executing a request.
+ */
+interface Handler {
+    setNext(handler: Handler): Handler;
+
+    handle(request: string): string;
+}
+
+/**
+ * The default chaining behavior can be implemented inside a base handler class.
+ */
+abstract class AbstractHandler implements Handler
+{
+    private nextHandler: Handler;
+
+    public setNext(handler: Handler): Handler {
+        this.nextHandler = handler;
+        // Returning a handler from here will let us link handlers in a
+        // convenient way like this:
+        // monkey.setNext(squirrel).setNext(dog);
+        return handler;
+    }
+
+    public handle(request: string): string {
+        if (this.nextHandler) {
+            return this.nextHandler.handle(request);
+        }
+
+        return null;
+    }
+}
+
+/**
+ * All Concrete Handlers either handle a request or pass it to the next handler
+ * in the chain.
+ */
+class MonkeyHandler extends AbstractHandler {
+    public handle(request: string): string {
+        if (request === 'Banana') {
+            return `Monkey: I'll eat the ${request}.`;
+        }
+        return super.handle(request);
+
+    }
+}
+
+function clientCode(handler: Handler) {
+    const foods = ['Nut', 'Banana', 'Cup of coffee'];
+
+    for (const food of foods) {
+        console.log(`Client: Who wants a ${food}?`);
+
+        const result = handler.handle(food);
+        if (result) {
+            console.log(`  ${result}`);
+        } else {
+            console.log(`  ${food} was left untouched.`);
+        }
+    }
+}
+
+
+/**
+ * The other part of the client code constructs the actual chain.
+ */
+const monkey = new MonkeyHandler();
+const squirrel = new SquirrelHandler();
+const dog = new DogHandler();
+
+monkey.setNext(squirrel).setNext(dog);
+```
+
+### Command
+**Command** is a behavioral design pattern that turns a request into a stand-alone object that contains all information about the request. This transformation lets you pass requests as a method arguments, delay or queue a request’s execution, and support undoable operations.
