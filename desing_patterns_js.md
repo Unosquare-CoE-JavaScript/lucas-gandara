@@ -864,4 +864,593 @@ monkey.setNext(squirrel).setNext(dog);
 ```
 
 ### Command
-**Command** is a behavioral design pattern that turns a request into a stand-alone object that contains all information about the request. This transformation lets you pass requests as a method arguments, delay or queue a request’s execution, and support undoable operations.
+**Command** is a behavioral design pattern that turns a request into a stand-alone object that contains all information about the request. This transformation lets you pass requests as a method arguments, delay or queue a request’s execution, and support undoable operations. Good software design is often based on the principle of separation of concerns, which usually results in breaking an app into layers.
+
+In the command pattern, the request is send to the _invoker_ and invoker pass it to the encapsulated _command_ object. Command objects passes the request to the appropiate method of _Receiver_ to perform the specific action. The client program create the receiver object and then attach it to the Command. Then it creates the invoker object and attach the command object to perform an action. Now when client program executes the action, it’s processed based on the command and receiver object.
+
+### Interpreter
+The Interpreter design pattern is used for evaluating a determined language and return an Expression. This pattern can interpret languages such as Java, C#, SQL, or even a new one invented by us, and provide a response based on its evaluation. This is one of the most complex design patterns, because we need to combine various object-oriented programming techniques in order to implement it, which can make it a bit difficult to understand. The main techniques we're going to be dealing with are Inheritance, Polymorphism and Recursivity.
+
+### Iterator
+Iterator is a behavioral design pattern that lets you traverse elements of a collection without exposing its underlying representation (list, stack, tree, etc.). Collections are one of the most used data types in programming. Nonetheless, a collection is just a container for a group of objects. This may sound like an easy job if you have a collection based on a list. You just loop over all of the elements. But how do you sequentially traverse elements of a complex data structure, such as a tree? For example, one day you might be just fine with depth-first traversal of a tree. Yet the next day you might require breadth-first traversal. And the next week, you might need something else, like random access to the tree elements.
+
+The main idea of the Iterator pattern is to extract the traversal behavior of a collection into a separate object called an iterator. In addition to implementing the algorithm itself, an iterator object encapsulates all of the traversal details, such as the current position and how many elements are left till the end. Because of this, several iterators can go through the same collection at the same time, independently of each other.
+
+```ts
+/**
+ * Iterator Design Pattern
+ *
+ * Intent: Lets you traverse elements of a collection without exposing its
+ * underlying representation (list, stack, tree, etc.).
+ */
+
+interface Iterator<T> {
+    // Return the current element.
+    current(): T;
+
+    // Return the current element and move forward to next element.
+    next(): T;
+
+    // Return the key of the current element.
+    key(): number;
+
+    // Checks if current position is valid.
+    valid(): boolean;
+
+    // Rewind the Iterator to the first element.
+    rewind(): void;
+}
+```
+
+### Mediator
+Mediator is a behavioral design pattern that lets you reduce chaotic dependencies between objects. The pattern restricts direct communications between the objects and forces them to collaborate only via a mediator object. The Mediator pattern suggests that you should cease all direct communication between the components which you want to make independent of each other. Instead, these components must collaborate indirectly, by calling a special mediator object that redirects the calls to appropriate components. As a result, the components depend only on a single mediator class instead of being coupled to dozens of their colleagues.
+
+### Memento
+Memento is a behavioral design pattern that lets you save and restore the previous state of an object without revealing the details of its implementation.
+![Before executing an operation, the app saves a snapshot of the objects’ state, which can later be used to restore objects to their previous state.](./imgs/memento_design_pattern.png)
+The Memento pattern delegates creating the state snapshots to the actual owner of that state, the originator object. Hence, instead of other objects trying to copy the editor’s state from the “outside,” the editor class itself can make the snapshot since it has full access to its own state.
+
+The pattern suggests storing the copy of the object’s state in a special object called memento. The contents of the memento aren’t accessible to any other object except the one that produced it. Other objects must communicate with mementos using a limited interface which may allow fetching the snapshot’s metadata (creation time, the name of the performed operation, etc.), but not the original object’s state contained in the snapshot.
+
+### Observer
+**Observer** is a behavioral design pattern that lets you define a subscription mechanism to notify multiple objects about any events that happen to the object they’re observing. The Observer pattern suggests that you add a subscription mechanism to the publisher class so individual objects can subscribe to or unsubscribe from a stream of events coming from that publisher. Fear not! Everything isn’t as complicated as it sounds. In reality, this mechanism consists of 1) an array field for storing a list of references to subscriber objects and 2) several public methods which allow adding subscribers to and removing them from that list.
+
+```ts
+/**
+ * The Subject interface declares a set of methods for managing subscribers.
+ */
+interface Subject {
+    // Attach an observer to the subject.
+    attach(observer: Observer): void;
+
+    // Detach an observer from the subject.
+    detach(observer: Observer): void;
+
+    // Notify all observers about an event.
+    notify(): void;
+}
+
+/**
+ * The Subject owns some important state and notifies observers when the state
+ * changes.
+ */
+class ConcreteSubject implements Subject {
+    /**
+     * @type {number} For the sake of simplicity, the Subject's state, essential
+     * to all subscribers, is stored in this variable.
+     */
+    public state: number;
+
+    /**
+     * @type {Observer[]} List of subscribers. In real life, the list of
+     * subscribers can be stored more comprehensively (categorized by event
+     * type, etc.).
+     */
+    private observers: Observer[] = [];
+
+    /**
+     * The subscription management methods.
+     */
+    public attach(observer: Observer): void {
+        const isExist = this.observers.includes(observer);
+        if (isExist) {
+            return console.log('Subject: Observer has been attached already.');
+        }
+
+        console.log('Subject: Attached an observer.');
+        this.observers.push(observer);
+    }
+
+    public detach(observer: Observer): void {
+        const observerIndex = this.observers.indexOf(observer);
+        if (observerIndex === -1) {
+            return console.log('Subject: Nonexistent observer.');
+        }
+
+        this.observers.splice(observerIndex, 1);
+        console.log('Subject: Detached an observer.');
+    }
+
+    /**
+     * Trigger an update in each subscriber.
+     */
+    public notify(): void {
+        console.log('Subject: Notifying observers...');
+        for (const observer of this.observers) {
+            observer.update(this);
+        }
+    }
+
+    /**
+     * Usually, the subscription logic is only a fraction of what a Subject can
+     * really do. Subjects commonly hold some important business logic, that
+     * triggers a notification method whenever something important is about to
+     * happen (or after it).
+     */
+    public someBusinessLogic(): void {
+        console.log('\nSubject: I\'m doing something important.');
+        this.state = Math.floor(Math.random() * (10 + 1));
+
+        console.log(`Subject: My state has just changed to: ${this.state}`);
+        this.notify();
+    }
+}
+
+/**
+ * The Observer interface declares the update method, used by subjects.
+ */
+interface Observer {
+    // Receive update from subject.
+    update(subject: Subject): void;
+}
+
+/**
+ * Concrete Observers react to the updates issued by the Subject they had been
+ * attached to.
+ */
+class ConcreteObserverA implements Observer {
+    public update(subject: Subject): void {
+        if (subject instanceof ConcreteSubject && subject.state < 3) {
+            console.log('ConcreteObserverA: Reacted to the event.');
+        }
+    }
+}
+
+class ConcreteObserverB implements Observer {
+    public update(subject: Subject): void {
+        if (subject instanceof ConcreteSubject && (subject.state === 0 || subject.state >= 2)) {
+            console.log('ConcreteObserverB: Reacted to the event.');
+        }
+    }
+}
+
+/**
+ * The client code.
+ */
+
+const subject = new ConcreteSubject();
+
+const observer1 = new ConcreteObserverA();
+subject.attach(observer1);
+
+const observer2 = new ConcreteObserverB();
+subject.attach(observer2);
+```
+
+### State
+State is a behavioral design pattern that lets an object alter its behavior when its internal state changes. It appears as if the object changed its class. The State pattern is closely related to the concept of a Finite-State Machine. The main idea is that, at any given moment, there’s a finite number of states which a program can be in. Within any unique state, the program behaves differently, and the program can be switched from one state to another instantaneously. However, depending on a current state, the program may or may not switch to certain other states. These switching rules, called transitions, are also finite and predetermined. You can also apply this approach to objects. Imagine that we have a <mark style="background-color: #e3e6e8">Document</mark> class. A document can be in one of three states: <mark style="background-color: #e3e6e8">Draft</mark>, <mark style="background-color: #e3e6e8">Moderation</mark> and <mark style="background-color: #e3e6e8">Published</mark>. The publish method of the document works a little bit differently in each state:
+
+- In <mark style="background-color: #e3e6e8">Draft</mark>, it moves the document to moderation.
+- In <mark style="background-color: #e3e6e8">Moderation</mark>, it makes the document public, but only if the current user is an administrator.
+- In <mark style="background-color: #e3e6e8">Published</mark>, it doesn’t do anything at all.
+
+![Possible states and transitions of a document object.](./imgs/state_design_pattern.png)
+State machines are usually implemented with lots of conditional statements (if or switch) that select the appropriate behavior depending on the current state of the object. Usually, this “state” is just a set of values of the object’s fields.
+
+The State pattern suggests that you create new classes for all possible states of an object and extract all state-specific behaviors into these classes. Instead of implementing all behaviors on its own, the original object, called context, stores a reference to one of the state objects that represents its current state, and delegates all the state-related work to that object.
+```ts
+/**
+ * The Context defines the interface of interest to clients. It also maintains a
+ * reference to an instance of a State subclass, which represents the current
+ * state of the Context.
+ */
+class Context {
+    /**
+     * @type {State} A reference to the current state of the Context.
+     */
+    private state: State;
+
+    constructor(state: State) {
+        this.transitionTo(state);
+    }
+
+    /**
+     * The Context allows changing the State object at runtime.
+     */
+    public transitionTo(state: State): void {
+        console.log(`Context: Transition to ${(<any>state).constructor.name}.`);
+        this.state = state;
+        this.state.setContext(this);
+    }
+
+    /**
+     * The Context delegates part of its behavior to the current State object.
+     */
+    public request1(): void {
+        this.state.handle1();
+    }
+
+    public request2(): void {
+        this.state.handle2();
+    }
+}
+
+/**
+ * The base State class declares methods that all Concrete State should
+ * implement and also provides a backreference to the Context object, associated
+ * with the State. This backreference can be used by States to transition the
+ * Context to another State.
+ */
+abstract class State {
+    protected context: Context;
+
+    public setContext(context: Context) {
+        this.context = context;
+    }
+
+    public abstract handle1(): void;
+
+    public abstract handle2(): void;
+}
+
+/**
+ * Concrete States implement various behaviors, associated with a state of the
+ * Context.
+ */
+class ConcreteStateA extends State {
+    public handle1(): void {
+        console.log('ConcreteStateA handles request1.');
+        console.log('ConcreteStateA wants to change the state of the context.');
+        this.context.transitionTo(new ConcreteStateB());
+    }
+
+    public handle2(): void {
+        console.log('ConcreteStateA handles request2.');
+    }
+}
+
+class ConcreteStateB extends State {
+    public handle1(): void {
+        console.log('ConcreteStateB handles request1.');
+    }
+
+    public handle2(): void {
+        console.log('ConcreteStateB handles request2.');
+        console.log('ConcreteStateB wants to change the state of the context.');
+        this.context.transitionTo(new ConcreteStateA());
+    }
+}
+
+/**
+ * The client code.
+ */
+const context = new Context(new ConcreteStateA());
+context.request1();
+context.request2();
+```
+
+### Strategy
+**Strategy** is a behavioral design pattern that lets you define a family of algorithms, put each of them into a separate class, and make their objects interchangeable. The Strategy pattern suggests that you take a class that does something specific in a lot of different ways and extract all of these algorithms into separate classes called strategies. The original class, called _context_, must have a field for storing a reference to one of the strategies. The context delegates the work to a linked strategy object instead of executing it on its own.
+
+The context isn’t responsible for selecting an appropriate algorithm for the job. Instead, the client passes the desired strategy to the context. In fact, the context doesn’t know much about strategies. It works with all strategies through the same generic interface, which only exposes a single method for triggering the algorithm encapsulated within the selected strategy.
+```ts
+/**
+ * The Context defines the interface of interest to clients.
+ */
+class Context {
+    /**
+     * @type {Strategy} The Context maintains a reference to one of the Strategy
+     * objects. The Context does not know the concrete class of a strategy. It
+     * should work with all strategies via the Strategy interface.
+     */
+    private strategy: Strategy;
+
+    /**
+     * Usually, the Context accepts a strategy through the constructor, but also
+     * provides a setter to change it at runtime.
+     */
+    constructor(strategy: Strategy) {
+        this.strategy = strategy;
+    }
+
+    /**
+     * Usually, the Context allows replacing a Strategy object at runtime.
+     */
+    public setStrategy(strategy: Strategy) {
+        this.strategy = strategy;
+    }
+
+    /**
+     * The Context delegates some work to the Strategy object instead of
+     * implementing multiple versions of the algorithm on its own.
+     */
+    public doSomeBusinessLogic(): void {
+        // ...
+
+        console.log('Context: Sorting data using the strategy (not sure how it\'ll do it)');
+        const result = this.strategy.doAlgorithm(['a', 'b', 'c', 'd', 'e']);
+        console.log(result.join(','));
+
+        // ...
+    }
+}
+
+/**
+ * The Strategy interface declares operations common to all supported versions
+ * of some algorithm.
+ *
+ * The Context uses this interface to call the algorithm defined by Concrete
+ * Strategies.
+ */
+interface Strategy {
+    doAlgorithm(data: string[]): string[];
+}
+
+/**
+ * Concrete Strategies implement the algorithm while following the base Strategy
+ * interface. The interface makes them interchangeable in the Context.
+ */
+class ConcreteStrategyA implements Strategy {
+    public doAlgorithm(data: string[]): string[] {
+        return data.sort();
+    }
+}
+
+class ConcreteStrategyB implements Strategy {
+    public doAlgorithm(data: string[]): string[] {
+        return data.reverse();
+    }
+}
+
+/**
+ * The client code picks a concrete strategy and passes it to the context. The
+ * client should be aware of the differences between strategies in order to make
+ * the right choice.
+ */
+const context = new Context(new ConcreteStrategyA());
+console.log('Client: Strategy is set to normal sorting.');
+context.doSomeBusinessLogic();
+
+console.log('');
+
+console.log('Client: Strategy is set to reverse sorting.');
+context.setStrategy(new ConcreteStrategyB());
+context.doSomeBusinessLogic();
+```
+
+### Template method
+**Template Method** is a behavioral design pattern that defines the skeleton of an algorithm in the superclass but lets subclasses override specific steps of the algorithm without changing its structure.
+
+The Template Method pattern suggests that you break down an algorithm into a series of steps, turn these steps into methods, and put a series of calls to these methods inside a single template method. The steps may either be abstract, or have some default implementation. To use the algorithm, the client is supposed to provide its own subclass, implement all abstract steps, and override some of the optional ones if needed (but not the template method itself).
+```ts
+/**
+ * The Abstract Class defines a template method that contains a skeleton of some
+ * algorithm, composed of calls to (usually) abstract primitive operations.
+ *
+ * Concrete subclasses should implement these operations, but leave the template
+ * method itself intact.
+ */
+abstract class AbstractClass {
+    /**
+     * The template method defines the skeleton of an algorithm.
+     */
+    public templateMethod(): void {
+        this.baseOperation1();
+        this.requiredOperations1();
+        this.baseOperation2();
+        this.hook1();
+        this.requiredOperation2();
+        this.baseOperation3();
+        this.hook2();
+    }
+
+    /**
+     * These operations already have implementations.
+     */
+    protected baseOperation1(): void {
+        console.log('AbstractClass says: I am doing the bulk of the work');
+    }
+
+    protected baseOperation2(): void {
+        console.log('AbstractClass says: But I let subclasses override some operations');
+    }
+
+    protected baseOperation3(): void {
+        console.log('AbstractClass says: But I am doing the bulk of the work anyway');
+    }
+
+    /**
+     * These operations have to be implemented in subclasses.
+     */
+    protected abstract requiredOperations1(): void;
+
+    protected abstract requiredOperation2(): void;
+
+    /**
+     * These are "hooks." Subclasses may override them, but it's not mandatory
+     * since the hooks already have default (but empty) implementation. Hooks
+     * provide additional extension points in some crucial places of the
+     * algorithm.
+     */
+    protected hook1(): void { }
+
+    protected hook2(): void { }
+}
+
+/**
+ * Concrete classes have to implement all abstract operations of the base class.
+ * They can also override some operations with a default implementation.
+ */
+class ConcreteClass1 extends AbstractClass {
+    protected requiredOperations1(): void {
+        console.log('ConcreteClass1 says: Implemented Operation1');
+    }
+
+    protected requiredOperation2(): void {
+        console.log('ConcreteClass1 says: Implemented Operation2');
+    }
+}
+
+/**
+ * Usually, concrete classes override only a fraction of base class' operations.
+ */
+class ConcreteClass2 extends AbstractClass {
+    protected requiredOperations1(): void {
+        console.log('ConcreteClass2 says: Implemented Operation1');
+    }
+
+    protected requiredOperation2(): void {
+        console.log('ConcreteClass2 says: Implemented Operation2');
+    }
+
+    protected hook1(): void {
+        console.log('ConcreteClass2 says: Overridden Hook1');
+    }
+}
+
+/**
+ * The client code calls the template method to execute the algorithm. Client
+ * code does not have to know the concrete class of an object it works with, as
+ * long as it works with objects through the interface of their base class.
+ */
+function clientCode(abstractClass: AbstractClass) {
+    // ...
+    abstractClass.templateMethod();
+    // ...
+}
+
+console.log('Same client code can work with different subclasses:');
+clientCode(new ConcreteClass1());
+console.log('');
+
+console.log('Same client code can work with different subclasses:');
+clientCode(new ConcreteClass2());
+```
+
+### Visitor
+Visitor is a behavioral design pattern that lets you separate algorithms from the objects on which they operate. The Visitor pattern suggests that you place the new behavior into a separate class called visitor, instead of trying to integrate it into existing classes. The original object that had to perform the behavior is now passed to one of the visitor’s methods as an argument, providing the method access to all necessary data contained within the object.
+
+Now, what if that behavior can be executed over objects of different classes? For example, in our case with XML export, the actual implementation will probably be a little bit different across various node classes.
+```ts
+/**
+ * The Component interface declares an `accept` method that should take the base
+ * visitor interface as an argument.
+ */
+interface Component {
+    accept(visitor: Visitor): void;
+}
+
+/**
+ * Each Concrete Component must implement the `accept` method in such a way that
+ * it calls the visitor's method corresponding to the component's class.
+ */
+class ConcreteComponentA implements Component {
+    /**
+     * Note that we're calling `visitConcreteComponentA`, which matches the
+     * current class name. This way we let the visitor know the class of the
+     * component it works with.
+     */
+    public accept(visitor: Visitor): void {
+        visitor.visitConcreteComponentA(this);
+    }
+
+    /**
+     * Concrete Components may have special methods that don't exist in their
+     * base class or interface. The Visitor is still able to use these methods
+     * since it's aware of the component's concrete class.
+     */
+    public exclusiveMethodOfConcreteComponentA(): string {
+        return 'A';
+    }
+}
+
+class ConcreteComponentB implements Component {
+    /**
+     * Same here: visitConcreteComponentB => ConcreteComponentB
+     */
+    public accept(visitor: Visitor): void {
+        visitor.visitConcreteComponentB(this);
+    }
+
+    public specialMethodOfConcreteComponentB(): string {
+        return 'B';
+    }
+}
+
+/**
+ * The Visitor Interface declares a set of visiting methods that correspond to
+ * component classes. The signature of a visiting method allows the visitor to
+ * identify the exact class of the component that it's dealing with.
+ */
+interface Visitor {
+    visitConcreteComponentA(element: ConcreteComponentA): void;
+
+    visitConcreteComponentB(element: ConcreteComponentB): void;
+}
+
+/**
+ * Concrete Visitors implement several versions of the same algorithm, which can
+ * work with all concrete component classes.
+ *
+ * You can experience the biggest benefit of the Visitor pattern when using it
+ * with a complex object structure, such as a Composite tree. In this case, it
+ * might be helpful to store some intermediate state of the algorithm while
+ * executing visitor's methods over various objects of the structure.
+ */
+class ConcreteVisitor1 implements Visitor {
+    public visitConcreteComponentA(element: ConcreteComponentA): void {
+        console.log(`${element.exclusiveMethodOfConcreteComponentA()} + ConcreteVisitor1`);
+    }
+
+    public visitConcreteComponentB(element: ConcreteComponentB): void {
+        console.log(`${element.specialMethodOfConcreteComponentB()} + ConcreteVisitor1`);
+    }
+}
+
+class ConcreteVisitor2 implements Visitor {
+    public visitConcreteComponentA(element: ConcreteComponentA): void {
+        console.log(`${element.exclusiveMethodOfConcreteComponentA()} + ConcreteVisitor2`);
+    }
+
+    public visitConcreteComponentB(element: ConcreteComponentB): void {
+        console.log(`${element.specialMethodOfConcreteComponentB()} + ConcreteVisitor2`);
+    }
+}
+
+/**
+ * The client code can run visitor operations over any set of elements without
+ * figuring out their concrete classes. The accept operation directs a call to
+ * the appropriate operation in the visitor object.
+ */
+function clientCode(components: Component[], visitor: Visitor) {
+    // ...
+    for (const component of components) {
+        component.accept(visitor);
+    }
+    // ...
+}
+
+const components = [
+    new ConcreteComponentA(),
+    new ConcreteComponentB(),
+];
+
+console.log('The client code works with all visitors via the base Visitor interface:');
+const visitor1 = new ConcreteVisitor1();
+clientCode(components, visitor1);
+console.log('');
+
+console.log('It allows the same client code to work with different types of visitors:');
+const visitor2 = new ConcreteVisitor2();
+clientCode(components, visitor2);
+```
